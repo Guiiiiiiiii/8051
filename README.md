@@ -22,8 +22,13 @@ PCB繪圖軟體         |Altium Designer
 <img src="https://raw.githubusercontent.com/Guiiiiiiiii/8051/master/AT89S52主控板成品圖.jpg"/>
 
 ## 項目1 4x4鍵盤控制三色燈
+<img src="https://raw.githubusercontent.com/Guiiiiiiiii/8051/master/4x4鍵盤控制RGB顏色.jpg"/>
+
 ## 項目2 上傳溫濕度到雲端
+<img src="https://raw.githubusercontent.com/Guiiiiiiiii/8051/master/ESP8266.jpg"/>
+
 ## 項目3 PWM調光
+<img src="https://raw.githubusercontent.com/Guiiiiiiiii/8051/master/PWM.jpg"/>
+
 ## 項目4 溫度警報器
-## 項目5 讀取溫濕度感測值
-## 項目6 3路PWM輸出
+<img src="https://raw.githubusercontent.com/Guiiiiiiiii/8051/master/Alarm.jpg"/>
