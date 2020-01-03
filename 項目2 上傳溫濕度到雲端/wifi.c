@@ -1,15 +1,15 @@
 /*
-	AT指令				描述
+	AT指令					描述
 	------------------------------------------------
-	AT+RST				重新啟動ESP8266	
-	AT+CWMODE			設定Wi-Fi模式
-					1：Station 				模式
-					2：SoftAP 				模式
-					3：SoftAP+Station 模式
-	AT+CWJAP			連接AP
-	AT+CIPMUX			設定 TCP/UDP 連線模式
-					0：單一連線				模式
-					1：多重連線				模式
+	AT+RST					重新啟動ESP8266	
+	AT+CWMODE				設定Wi-Fi模式
+									1：Station 				模式
+									2：SoftAP 				模式
+									3：SoftAP+Station 模式
+	AT+CWJAP				連接AP
+	AT+CIPMUX				設定 TCP/UDP 連線模式
+									0：單一連線				模式
+									1：多重連線				模式
 	AT+CIPSTART			建立TCP連接，UDP傳輸或者SSL連接
 	AT+CIPSEND			發送數據
 	AT+CIPCLOSE			關閉TCP/UDP/SSL傳輸
