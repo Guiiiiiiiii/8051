@@ -1,3 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-* tabs=4
+*.c tabwidth=2
+*.h tabwidth=2
