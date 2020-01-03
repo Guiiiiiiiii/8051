@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include "delay.h"
 #include "type.h"
-// WiFi Function
-extern void WiFi_SetNetwork(void);
+/* WiFi Function */
+extern void WiFi_ConnectAP(void);
 extern void WiFi_UpdateDHT(u8, u8);
-// DHT11 Function
+/* DHT11 Function */
 extern void DHT_GetData(u8 *h, u8 *t, u8 *chk);
-// 設定UART鮑率為9600bps
+/* 設定UART鮑率為9600bps */
 void UART_Init(void)
 {
 	TMOD = 0x21;
@@ -22,7 +22,7 @@ void UART_Init(void)
 main()
 {
 	UART_Init();
-	WiFi_SetNetwork();
+	WiFi_ConnectAP();
 	while(1)
 	{
 		u8 hum, temp, checkSum;

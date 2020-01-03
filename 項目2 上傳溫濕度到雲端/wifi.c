@@ -18,23 +18,23 @@
 #include <string.h>
 #include "delay.h"
 #include "type.h"
-// 設定WiFi資料
+/* 設定WiFi資料 */
 const char code SSID[] 		= "SHENG";
 const char code PASSWORD[] 	= "103403059";
 const char code SERVER[]	= "184.106.153.149";	// Thingspeak ip
 const char code WRITE_API_KEY[] = "FEZ1ZIIYB1BPM4HQ";	// Thingspeak API Key
-// WiFi連線
-void WiFi_SetNetwork(void)
+/* WiFi連線 */
+void WiFi_ConnectAP(void)
 {
 	printf("AT+RST\n\r");
-	// 等待回應
+	/* 等待回應 */
 	Delay1ms(2000);
 	printf("AT+CWMODE=1\n\r");
 	printf("AT+CWJAP=");
 	printf("\"%s\",\"%s\"", SSID, PASSWORD);
 	printf("\n\r");
 }
-// 建立TCP連接
+/* 建立TCP連接 */
 void WiFi_UpdateDHT(u8 dat1, u8 dat2)
 {
 	char idata CmdBuffer[80];
@@ -46,14 +46,14 @@ void WiFi_UpdateDHT(u8 dat1, u8 dat2)
 	strcat(CmdBuffer, SERVER);
 	strcat(CmdBuffer, "\",80\n\r");
 	printf(CmdBuffer);
-	// 等待回應
+	/* 等待回應 */
 	Delay1ms(1000);
 	sprintf(CmdBuffer, "GET /update?api_key=%s&field1=%bu&field2=%bu",
 		WRITE_API_KEY, dat1, dat2);
 	
 	len = strlen(CmdBuffer) + 2;	// 換行+迴車
 	printf("AT+CIPSEND=%bu\n\r", len);
-	// 等待回應
+	/* 等待回應 */
 	Delay1ms(1000);
 	printf(CmdBuffer);
 	Delay1ms(1000);			// 防busy

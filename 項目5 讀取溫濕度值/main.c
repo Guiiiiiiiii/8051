@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include "delay.h"
 #include "type.h"
-// DHT副程式
+/* DHT副程式 */
 extern void DHT_Start(void);
 extern u8 DHT_Read(void);
-// 設定UART鮑率為9600bps
+/* 設定UART鮑率為9600bps */
 void UART_Init(void)
 {
 	TMOD = 0x21;

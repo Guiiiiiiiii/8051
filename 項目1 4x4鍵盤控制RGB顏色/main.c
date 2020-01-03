@@ -2,46 +2,52 @@
 #include "LCM.h"
 #include "delay.h"
 #include "type.h"
-#define KEYP		P2
-// RGB ä½¿ç”¨è®Šæ•¸
+/* PWM ¨Ï¥ÎÅÜ¼Æ */
 sbit RED   = P3^3;
 sbit GREEN = P3^4;
 sbit BLUE  = P3^5;
-u16 on, off;
+
+bit flag = 0;
 u8 pwm = 1;
 u8 LEDColor;
-bit flag = 0;
+u16 on, off;
+
+/* LCM ¨Ï¥ÎÅÜ¼Æ */
 char code dispColor[][6] = {{"Red   "}, {"Green "}, {"Blue  "},
 {"Purple"}, {"Yellow"}, {"Cyan  "}, {"White "}, {"Black "}};
-// LCM ä½¿ç”¨è®Šæ•¸
 char code line1[] = "PWM&LCD Testing.";
-// KEYP ä½¿ç”¨è®Šæ•¸
-char code key[16] = { 0, 10, 11, 15,		// F, E, D, C		4*4éµç›¤ä¸Šçš„æ•¸å­—
-		      1, 2, 3, 14,		// B, 2, 6, 9
-		      4, 5, 6, 13,		// A, 2, 5, 8
-		      7, 8, 9, 12 };		// 0, 1, 4, 7
+
+/* Áä½L¨Ï¥ÎÅÜ¼Æ */
+#define KEYP		P2
+char code key[16] = { 0, 10, 11, 15,		// F, E, D, C		4*4Áä½L¤Wªº¼Æ¦r
+											1, 2, 3, 14,			// B, 3, 6, 9
+											4, 5, 6, 13,			// A, 2, 5, 8
+											7, 8, 9, 12 };		// 0, 1, 4, 7
 u8 scanKey[] = {0xef, 0xdf, 0xbf, 0x7f};
 u8 mode = 0;
 u8 g_key;
 u8 keyIn[2];
-// RGB Function
-void init_PWM(void)
+
+/* PWM Freq: 500hz */
+void PWM_Init(void)
 {
-	IE = 0x82;	// å•Ÿç”¨TIM0
+	IE = 0x82;	// ±Ò¥ÎTimer0 ¤¤Â_
 	TMOD = 0x01;
+	TH0 = 0xf8;
+	TL0 = 0x30;
 	TR0 = 1;
 }
-// è¨­å®šå·¥ä½œé€±æœŸ
-void SetDuty(u16 count)
+/* ³]©wPWM ¤u§@¶g´Á */
+void PWM_setDuty(u16 duty)
 {
 	u16 cnt;
 	
-	cnt = count * 20;
+	cnt = duty * 20;
 	on  = (65536 - (cnt));
 	off = (65536 - (2000 - cnt));
 }
-// RGBèª¿è‰²
-void RGB_Toning(void) interrupt 1
+/* RGB½Õ¦â */
+void RGB_Tunings(void) interrupt 1
 {
 	TR0 = 0;
 	
@@ -52,10 +58,9 @@ void RGB_Toning(void) interrupt 1
 		RED = GREEN = BLUE = 1;
 	} else {
 		TH0 = off/256;
-		TL0 = off%256;
-		
-		// è¨­å®š R,G,B PWM
-		if (LEDColor == 0) 	{RED = 0; GREEN = 1; BLUE = 1;}
+		TL0 = off%256;	
+		// ³]©w RGB PWM
+		if (LEDColor == 0) 			{RED = 0; GREEN = 1; BLUE = 1;}
 		else if (LEDColor == 1) {RED = 1; GREEN = 0; BLUE = 1;}
 		else if (LEDColor == 2) {RED = 1; GREEN = 1; BLUE = 0;}
 		else if (LEDColor == 3) {RED = 0; GREEN = 1; BLUE = 0;}
@@ -67,16 +72,14 @@ void RGB_Toning(void) interrupt 1
 	
 	TR0 = 1;
 }
-// End
-//--------------------------------------------------------------------
-// 4*4éµç›¤ Function
-// è®€å–éµç›¤å€¼
+
+/* Åª¨úÁä½L­È */
 void KeyScan(void)
 {
 	u8 col, row;
 	u8 rowkey, kcode;
 	
-	g_key = 16;	// æ¸…é™¤ä¸Šä¸€ç­†æŒ‰éµå€¼
+	g_key = 16;	// ²M°£¤W¤@µ§«öÁä­È
 	for (col=0;col<4;col++) {
 		KEYP = scanKey[col];
 		rowkey = ~KEYP & 0x0f;
@@ -86,46 +89,45 @@ void KeyScan(void)
 			else if (rowkey == 0x04) row = 2;
 			else if (rowkey == 0x08) row = 3;
 			kcode = 4*col + row;
-			g_key = key[kcode];	// å°‡æŒ‰éµå€¼ è½‰æ›æˆ 4*4éµç›¤ä¸Šçš„æ•¸å­—
+			g_key = key[kcode];	// ±N«öÁä­ÈÂà´«¦¨4*4Áä½L¤Wªº¼Æ¦r
 			while (rowkey != 0)
 				rowkey = ~KEYP & 0x0f;
 		}
 		Delay1ms(1);
 	}
 }
-// è¨­å®šéµç›¤åŠŸèƒ½
+/* ³]©wÁä½L¥\¯à */
 void KeyLCM(void)
 {
 	u8 i;
 	
-	// ç­‰å¾…æ–°çš„æŒ‰éµå€¼
+	/* µ¥«İ·sªº«öÁä­È */
 	if (g_key < 16) {
 		if ((mode == 0) && (g_key < 8)) {
-			LEDColor = g_key;
+			LEDColor = g_key;											// §ó§ïLEDÃC¦â[0:7]
 			write_inst(0xc0);
-			write_char(0x30+LEDColor);			// é¡¯ç¤ºç¬¬Nå€‹é¡è‰²
+			write_char(0x30+LEDColor);						// Åã¥ÜÃC¦â¸¹½X
 			write_inst(0xc3);
 			for (i=0;i<6;i++)
 				write_char(' ');
 			write_inst(0xc3);
 			for (i=0;i<6;i++)
-				write_char(dispColor[LEDColor][i]);	// é¡¯ç¤ºç›®å‰é¡è‰²
+				write_char(dispColor[LEDColor][i]);	// Åã¥Ü¥Ø«eÃC¦â
 		}
-		/* æŒ‰éµåŠŸèƒ½			æè¿°
+		/* «öÁä¥\¯à			´y­z
 		-------------------------------------
-		   æŒ‰éµA			è¨­å®šè¼¸å…¥æ¨¡å¼
-						0:ä¸é€²è¡Œè¼¸å…¥
-						1:åä½æ•¸è¼¸å…¥
-					    	2:å€‹ä½æ•¸è¼¸å…¥
-					    	3:ç­‰å¾…é€å‡º
-		   æŒ‰éµB			ç¢ºå®šéµ
-		   æŒ‰éµC			PWMæ¸›10%
-		   æŒ‰éµD			PWMåŠ 10%
-		   æŒ‰éµF			æ¸…é™¤PWMå€¼
+			 «öÁäA			mode = 0:¤£¶i¦æ§ó§ï
+									mode = 1:¤Q¦ì¼Æ¿é¤J
+									mode = 2:­Ó¦ì¼Æ¿é¤J
+									mode = 3:µ¥«İ§ó§ï
+		   «öÁäB			½T©w§ó§ï
+		   «öÁäC			´î10%LED«G«×
+		   «öÁäD			¥[10%LED«G«×
+		   «öÁäF			²M°£PWM­È
 		*/
 		switch (g_key) {
 			case 10: 
-				mode = (mode<3)? mode+1:3; 
+				mode = 1;
 			case 11:
 				if (mode == 3) {
 					pwm = keyIn[0]*10 + keyIn[1];
@@ -133,10 +135,10 @@ void KeyLCM(void)
 				}
 				break;
 			case 12:
-				if (mode == 0) pwm = (pwm>1)?  pwm-10:1;
+				if (mode == 0) pwm = (pwm<=9)?  1:pwm-10;
 			break;
 			case 13:
-				if (mode == 0) pwm = (pwm<99)? pwm+10:99;
+				if (mode == 0) pwm = (pwm>=89)? 99:pwm+10;
 			break;
 			case 15:
 				keyIn[0] = 0;
@@ -146,21 +148,21 @@ void KeyLCM(void)
 		}
 		if ((mode != 0) && (mode != 3) && (g_key < 10)) {
 			keyIn[mode-1] = g_key;
+			mode++;
 		}
-		SetDuty(pwm);
+		PWM_setDuty(pwm);	// ³]©wRGB«G«×
 	}
 }
-// End
 /*************************** Main Loop **********************************/
 main()
 {
 	u8 i;
 	
 	init_LCM();
-	init_PWM();
+	PWM_Init();
 	RED = GREEN = BLUE = 1;
 	write_inst(0x80);
-	// è¨­å®šLCMç¬¬ä¸€è¡Œæ–‡å­—
+	// ³]©wLCM²Ä¤@¦æ¤å¦r
 	for (i=0;i<16;i++)
 		write_char(line1[i]);
 	write_inst(0xc0);
@@ -168,8 +170,8 @@ main()
 	{
 		KeyScan();
 		KeyLCM();
-		/*	mode>0ï¼Œé¡¯ç¤ºç›®å‰æ­£åœ¨è¼¸å…¥å€¼
-			mode=0ï¼Œé¡¯ç¤ºç›®å‰PWMå€¼		*/
+		/*	mode>0¡AÅã¥Ü¥Ø«e¿é¤J­È
+				mode=0¡AÅã¥Ü¥Ø«e«G«×		*/
 		if (mode != 0) {
 			write_inst(0xca);
 			write_char(0x30+keyIn[0]);
